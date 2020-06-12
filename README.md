@@ -1,7 +1,9 @@
-`depstubber` is a tool that generates stubs for dependencies, for use in
+# depstubber
+
+This is a tool that generates type-correct stubs for dependencies, for use in
 testing. It is particularly useful for testing static analysis applications,
-where including the entire may be undesirable. It was written and is currently
-used for testing (CodeQL Go)[https://github.com/github/codeql-go].
+where including library source code may be undesirable. It was written and is currently
+used for testing [CodeQL Go](https://github.com/github/codeql-go).
 
 The general usage pattern if vendoring is desired will look something like:
 
