@@ -15,6 +15,17 @@ depstubber -write_module_txt
 depstubber -vendor github.com/my/package Type1,Type2 SomeFunc,SomeVariable
 ```
 
+The last line can be executed using Go's built in `generate` subcommand, by
+adding a comment to any relevant Go file that looks like this:
+
+```go
+//go:generate depstubber -vendor github.com/my/package Type1,Type2 SomeFunc,SomeVariable
+```
+
+Then, run `go generate <package>`, where `<package>` is the package containing
+the file the comment was added to. This will automatically run the depstubber
+command.
+
 Limitations:
 
  - It is limited to a single package at a time.
