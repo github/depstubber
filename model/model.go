@@ -212,7 +212,7 @@ func (pkg *Package) AddType(name string, typ reflect.Type) error {
 
 	pkg.Exports[name] = nil // ensure that AddType does not run twice
 
-	t, err := pkg.typeFromType(typ)
+	t, err := pkg.typeFromNameType(name, typ, false)
 	if err != nil {
 		return err
 	}
@@ -543,6 +543,38 @@ func (mt *MapType) addImports(im map[string]bool) {
 	mt.Value.addImports(im)
 }
 
+// AliasType is a named type that is an alias to another type
+type AliasType struct {
+	Package    string // may be empty
+	Name       string
+	Underlying Type
+}
+
+func (nt *NamedType) Declaration(pm map[string]string, pkgOverride string) string {
+	return "type " + nt.Name + " = " + nt.Underlying.String(pm, pkgOverride) + "\n"
+}
+
+func (nt *NamedType) String(pm map[string]string, pkgOverride string) string {
+	if pkgOverride == nt.Package {
+		return nt.Name
+	}
+
+	if prefix, ok := pm[nt.Package]; ok {
+		return prefix + "." + nt.Name
+	}
+
+	fmt.Fprintf(os.Stderr, "Warning: import was not found for type %s.%s (package map: %v)\n", nt.Package, nt.Name, pm)
+
+	return nt.Name
+}
+
+func (at *NamedType) addImports(im map[string]bool) {
+	if at.Package != "" {
+		im[at.Package] = true
+	}
+	at.Underlying.addImports(im)
+}
+
 // NamedType is an exported type in a package.
 type NamedType struct {
 	Package    string // may be empty
@@ -676,23 +708,40 @@ func isInStdlib(pkg string) bool {
 }
 
 func (pkg *Package) typeFromType(t reflect.Type) (Type, error) {
+	return pkg.typeFromNameType("", t, false)
+}
+
+func (pkg *Package) typeFromNameType(name string, t reflect.Type, forceExternalType bool) (Type, error) {
 	if t == byteType {
 		return PredeclaredType("byte"), nil
 	}
 
-	if imp := t.PkgPath(); imp != "" {
-		if !isExported(t.Name()) || (imp != pkg.PkgPath && !isInStdlib(imp)) {
+	var imp string
+	if pkg.PkgPath != t.PkgPath() || name != t.Name() {
+
+	}
+
+	if name == "" ||  {
+		imp = t.PkgPath()
+		name = t.Name()
+	} else {
+		// we should generate an alias type, as the main type is from a different package
+
+	}
+
+	if imp != "" {
+		if !forceExternalType && (!isExported(t.Name()) || (imp != pkg.PkgPath && !isInStdlib(imp))) {
 			return EmptyInterface, nil
 		}
 
-		typPath := imp + "." + t.Name()
+		typPath := imp + "." + name
 		if res, ok := pkg.NamedTypes[typPath]; ok {
 			return res, nil
 		}
 
 		res := &NamedType{
 			Package: impPath(imp),
-			Name:    t.Name(),
+			Name:    name,
 		}
 
 		pkg.NamedTypes[typPath] = res
