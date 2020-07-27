@@ -942,6 +942,73 @@ func zeroOf(t Type, pm map[string]string, pkgOverride string) string {
 	}
 }
 
+// List of words to avoid using taken from https://notes.shichao.io/golang/
+// These are both keywords that can't ever be identifiers, and pre-defined identifiers
+// which it is merely a bad idea to clash with.
+var goReservedIdentifiers = map[string]bool{
+	"break": true,
+	"default": true,
+	"func": true,
+	"interface": true,
+	"select": true,
+	"case": true,
+	"defer": true,
+	"go": true,
+	"map": true,
+	"struct": true,
+	"chan": true,
+	"else": true,
+	"goto": true,
+	"package": true,
+	"switch": true,
+	"const": true,
+	"fallthrough": true,
+	"if": true,
+	"range": true,
+	"type": true,
+	"continue": true,
+	"for": true,
+	"import": true,
+	"return": true,
+	"var": true,
+	"append": true,
+	"bool": true,
+	"byte": true,
+	"cap": true,
+	"close": true,
+	"complex": true,
+	"complex64": true,
+	"complex128": true,
+	"uint16": true,
+	"copy": true,
+	"false": true,
+	"float32": true,
+	"float64": true,
+	"imag": true,
+	"int": true,
+	"int8": true,
+	"int16": true,
+	"uint32": true,
+	"int32": true,
+	"int64": true,
+	"iota": true,
+	"len": true,
+	"make": true,
+	"new": true,
+	"nil": true,
+	"panic": true,
+	"uint64": true,
+	"print": true,
+	"println": true,
+	"real": true,
+	"recover": true,
+	"string": true,
+	"true": true,
+	"uint": true,
+	"uint8": true,
+	"uintptr": true,
+}
+
 // sanitize cleans up a string to make a suitable package name.
 func sanitize(s string) string {
 	t := ""
@@ -961,6 +1028,9 @@ func sanitize(s string) string {
 	}
 	if t == "_" {
 		t = "x"
+	}
+	if isReserved, _ := goReservedIdentifiers[t]; isReserved {
+		t = t + "pkg"
 	}
 	return t
 }
