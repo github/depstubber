@@ -10,7 +10,7 @@ The general usage pattern if vendoring is desired will look something like:
 ```sh
 go install github.com/github/depstubber
 go mod tidy # required to generate go.sum
-# generate a vendor/module.txt for the go 1.24 vendor consistency check
+# generate a vendor/module.txt for the go 1.14 vendor consistency check
 depstubber -write_module_txt
 depstubber -vendor github.com/my/package Type1,Type2 SomeFunc,SomeVariable
 ```
