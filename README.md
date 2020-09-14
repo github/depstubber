@@ -14,7 +14,7 @@ go mod tidy # required to generate go.sum
 # generate a vendor/module.txt for the go 1.24 vendor consistency check
 depstubber -write_module_txt
 # Create stubs of Type1, Type2, SomeFunc, and SomeVariable. They are separated by a space
-# because values must be treated differently by types in the implementation of depstubber.
+# because values must be treated differently from types in the implementation of depstubber.
 depstubber -vendor github.com/my/package Type1,Type2 SomeFunc,SomeVariable
 ```
 
