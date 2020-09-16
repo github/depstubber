@@ -202,6 +202,10 @@ func (pkg *Package) Imports() map[string]bool {
 			}
 		}
 	}
+
+	for _, typ := range pkg.NamedTypes {
+		typ.addImports(im)
+	}
 	return im
 }
 
