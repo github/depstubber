@@ -1,6 +1,6 @@
 # depstubber
 
-![CI](https://github.com/leozz37/depstubber/workflows/CI/badge.svg)
+![CI](https://github.com/github/depstubber/workflows/CI/badge.svg)
 
 This is a tool that generates type-correct stubs for dependencies, for use in
 testing. It is particularly useful for testing static analysis applications,
