@@ -24,6 +24,7 @@ var (
 	writeModuleTxt = flag.Bool("write_module_txt", false, "Write a stub modules.txt to get around the go1.14 vendor check, if necessary.")
 )
 var (
+	// NOTE: The detection is done IN THE CURRENT DIRECTORY.
 	autoDetectUsed  = flag.Bool("auto", false, "[experimental] Automatically detect imported objects in the current directory package.")
 	printGenComment = flag.Bool("print-gen", false, "[experimental] Automatically detect imported objects in the current dir pkg, and print go:generate comments for them, and then exit.")
 )
