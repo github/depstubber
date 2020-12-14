@@ -22,6 +22,10 @@ var (
 	copyrightFile  = flag.String("copyright_file", "", "Copyright file used to add copyright header")
 	writeModuleTxt = flag.Bool("write_module_txt", false, "Write a stub modules.txt to get around the go1.14 vendor check, if necessary.")
 )
+var (
+	autoDetectUsed  = flag.Bool("auto", false, "[experimental] Automatically detect imported objects in the current directory.")
+	printGenComment = flag.Bool("print-gen", false, "[experimental] Automatically detect imported objects in the current dir, and print go:generate comments for them, and then exit.")
+)
 
 func main() {
 	flag.Usage = usage
@@ -30,6 +34,15 @@ func main() {
 	// if -write_module_txt has been passed, generate a stub version of a `module/vendor.txt` file
 	if *writeModuleTxt {
 		stubModulesTxt()
+		return
+	}
+
+	if *printGenComment {
+		pathToTypeNames, pathToFuncAndVarNames, err := autoDetect(".", ".")
+		if err != nil {
+			log.Fatalf("Error while auto-detecting imported objects: %s", err)
+		}
+		printGoGenerateComments(pathToTypeNames, pathToFuncAndVarNames)
 		return
 	}
 
