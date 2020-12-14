@@ -24,7 +24,18 @@ func (ce *CombinedErrors) Error() string {
 	}
 	return buf.String()
 }
+func allNil(errs ...error) bool {
+	for _, err := range errs {
+		if err != nil {
+			return false
+		}
+	}
+	return true
+}
 func CombineErrors(errs ...error) error {
+	if len(errs) == 0 || allNil(errs...) {
+		return nil
+	}
 	return &CombinedErrors{
 		errs: errs,
 	}
@@ -50,9 +61,8 @@ func loadPackage(startPkg string, dir string) (*packages.Package, error) {
 			errs = append(errs, err)
 		}
 	})
-	err = CombineErrors(errs...)
 	if len(errs) > 0 {
-		return nil, fmt.Errorf("error while packages.Load: %s", err)
+		return nil, fmt.Errorf("error while packages.Load: %s", CombineErrors(errs...))
 	}
 
 	return pkgs[0], nil
