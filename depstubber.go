@@ -10,6 +10,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 
 	"github.com/github/depstubber/model"
@@ -23,8 +24,8 @@ var (
 	writeModuleTxt = flag.Bool("write_module_txt", false, "Write a stub modules.txt to get around the go1.14 vendor check, if necessary.")
 )
 var (
-	autoDetectUsed  = flag.Bool("auto", false, "[experimental] Automatically detect imported objects in the current directory.")
-	printGenComment = flag.Bool("print-gen", false, "[experimental] Automatically detect imported objects in the current dir, and print go:generate comments for them, and then exit.")
+	autoDetectUsed  = flag.Bool("auto", false, "[experimental] Automatically detect imported objects in the current directory package.")
+	printGenComment = flag.Bool("print-gen", false, "[experimental] Automatically detect imported objects in the current dir pkg, and print go:generate comments for them, and then exit.")
 )
 
 func main() {
@@ -46,15 +47,45 @@ func main() {
 		return
 	}
 
+	if *autoDetectUsed {
+		pathToTypeNames, pathToFuncAndVarNames, err := autoDetect(".", ".")
+		if err != nil {
+			log.Fatalf("Error while auto-detecting imported objects: %s", err)
+		}
+		pkgPaths := make([]string, 0)
+		{
+			for path := range pathToFuncAndVarNames {
+				pkgPaths = append(pkgPaths, path)
+			}
+			for path := range pathToTypeNames {
+				pkgPaths = append(pkgPaths, path)
+			}
+			pkgPaths = DeduplicateStrings(pkgPaths)
+			sort.Strings(pkgPaths)
+		}
+
+		for _, pkgPath := range pkgPaths {
+			createStubs(
+				pkgPath,
+				pathToTypeNames[pkgPath],
+				pathToFuncAndVarNames[pkgPath],
+			)
+		}
+	} else {
+		if flag.NArg() != 2 && flag.NArg() != 3 {
+			usage()
+			log.Fatal("Expected exactly two or three arguments")
+		}
+		packageName := flag.Arg(0)
+		createStubs(packageName, split(flag.Arg(1)), split(flag.Arg(2)))
+	}
+}
+
+func createStubs(packageName string, typeNames []string, funcAndVarNames []string) {
+
 	var pkg *model.PackedPkg
 	var err error
-	var packageName string
 
-	if flag.NArg() != 2 && flag.NArg() != 3 {
-		usage()
-		log.Fatal("Expected exactly two or three arguments")
-	}
-	packageName = flag.Arg(0)
 	if packageName == "." {
 		dir, err := os.Getwd()
 		if err != nil {
@@ -66,7 +97,7 @@ func main() {
 		}
 	}
 
-	pkg, err = reflectMode(packageName, split(flag.Arg(1)), split(flag.Arg(2)))
+	pkg, err = reflectMode(packageName, typeNames, funcAndVarNames)
 
 	if err != nil {
 		log.Fatalf("Loading input failed: %v", err)
@@ -108,7 +139,6 @@ func main() {
 		g.copyrightHeader = string(header)
 	} else {
 		// check that there is a LICENSE file
-
 	}
 
 	if err := g.Generate(pkg); err != nil {
