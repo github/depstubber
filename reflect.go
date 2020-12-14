@@ -133,7 +133,6 @@ func runInDir(program []byte, dir string) (*model.PackedPkg, error) {
 		if modRoot != "" {
 			MustCopyFile(filepath.Join(modRoot, "go.mod"), filepath.Join(tmpDir, "go.mod"))
 		}
-
 	}
 
 	return run(filepath.Join(tmpDir, progBinary))
