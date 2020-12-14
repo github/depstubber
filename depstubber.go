@@ -5,7 +5,6 @@ import (
 	"bytes"
 	"flag"
 	"fmt"
-	"go/format"
 	"io"
 	"io/ioutil"
 	"log"
@@ -14,6 +13,7 @@ import (
 	"strings"
 
 	"github.com/github/depstubber/model"
+	"golang.org/x/tools/imports"
 )
 
 var (
@@ -167,7 +167,8 @@ func (g *generator) Generate(pkg *model.PackedPkg) error {
 
 // Output returns the generator's output, formatted in the standard Go style.
 func (g *generator) Output() []byte {
-	src, err := format.Source(g.buf.Bytes())
+	// Format source and add or remove import statements as necessary:
+	src, err := imports.Process("", g.buf.Bytes(), nil)
 	if err != nil {
 		log.Fatalf("Failed to format generated source code: %s\n%s", err, g.buf.String())
 	}
