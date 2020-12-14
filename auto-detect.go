@@ -117,7 +117,7 @@ func autoDetect(startPkg string, dir string) (map[string][]string, map[string][]
 			// p.Package.TypesInfo.Uses also contains used objects that
 			// are declared inside the same package, and this means
 			// that some objects might not be exported.
-			panic("This should not happen.")
+			panic("This should not happen at this point.")
 			continue
 		}
 
@@ -211,10 +211,11 @@ func FormatDepstubberComment(path string, typeNames []string, funcAndVarNames []
 func printGoGenerateComments(pathToTypeNames map[string][]string, pathToFuncAndVarNames map[string][]string) {
 	pkgPaths := make([]string, 0)
 	{
-		for path := range pathToFuncAndVarNames {
+		// Get a list of all package paths:
+		for path := range pathToTypeNames {
 			pkgPaths = append(pkgPaths, path)
 		}
-		for path := range pathToTypeNames {
+		for path := range pathToFuncAndVarNames {
 			pkgPaths = append(pkgPaths, path)
 		}
 		pkgPaths = DeduplicateStrings(pkgPaths)
