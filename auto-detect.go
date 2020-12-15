@@ -147,7 +147,6 @@ func autoDetect(startPkg string, dir string) (map[string][]string, map[string][]
 				default:
 					panic(fmt.Sprintf("unknown type %T", obj.Type()))
 				}
-
 			}
 		case *types.Const:
 			{
@@ -160,7 +159,6 @@ func autoDetect(startPkg string, dir string) (map[string][]string, map[string][]
 				pathToFuncAndVarNames[pkgPath] = append(pathToFuncAndVarNames[pkgPath], thing.Name())
 			}
 		case *types.Func:
-
 			switch thing.Type().(type) {
 			case *types.Signature:
 				{
