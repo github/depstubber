@@ -197,6 +197,7 @@ func autoDetect(startPkg string, dir string) (map[string][]string, map[string][]
 func FormatDepstubberComment(path string, typeNames []string, funcAndVarNames []string) string {
 	var first string
 	if len(typeNames) > 0 {
+		typeNames = DeduplicateStrings(typeNames)
 		sort.Strings(typeNames)
 		first = strings.Join(typeNames, ",")
 	} else {
@@ -205,6 +206,7 @@ func FormatDepstubberComment(path string, typeNames []string, funcAndVarNames []
 
 	var second string
 	if len(funcAndVarNames) > 0 {
+		funcAndVarNames = DeduplicateStrings(funcAndVarNames)
 		sort.Strings(funcAndVarNames)
 		second = strings.Join(funcAndVarNames, ",")
 	} else {
