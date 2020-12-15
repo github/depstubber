@@ -244,7 +244,7 @@ func printGoGenerateComments(pathToTypeNames map[string][]string, pathToFuncAndV
 	}
 
 	// If `depstubber -write_module_txt` is not executed, then
-	// you'll encunter a `go: inconsistent vendoring in ...` error;
+	// you'll encounter a `go: inconsistent vendoring in ...` error;
 	// Printing this as a reminder can save time for a few people.
 	fmt.Println("//go:generate depstubber -write_module_txt")
 }
