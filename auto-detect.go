@@ -7,6 +7,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/golang/dep/gps/paths"
 	"golang.org/x/tools/go/packages"
 	"golang.org/x/tools/go/vcs"
 )
@@ -86,15 +87,6 @@ func DeduplicateStrings(slice []string) []string {
 	return result
 }
 
-func IsStandardImportPath(path string) bool {
-	i := strings.Index(path, "/")
-	if i < 0 {
-		i = len(path)
-	}
-	elem := path[:i]
-	return !strings.Contains(elem, ".")
-}
-
 func autoDetect(startPkg string, dir string) (map[string][]string, map[string][]string, error) {
 	pk, err := loadPackage(startPkg, dir)
 	if err != nil {
@@ -112,7 +104,7 @@ func autoDetect(startPkg string, dir string) (map[string][]string, map[string][]
 			continue
 		}
 
-		if isStd := IsStandardImportPath(obj.Pkg().Path()); isStd {
+		if isStd := paths.IsStandardImportPath(obj.Pkg().Path()); isStd {
 			// Skip objects that belong to a Go standard library.
 			continue
 		}
