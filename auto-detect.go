@@ -105,14 +105,14 @@ func autoDetect(startPkg string, dir string) (map[string][]string, map[string][]
 		}
 
 		if isStd := paths.IsStandardImportPath(obj.Pkg().Path()); isStd {
-			// Skip objects that belong to a Go standard library.
+			// Skip objects that belong to a Go standard library (supposedly).
 			continue
 		}
 
 		packageIsSame := obj.Pkg() == pk.Types
 		packageIsSamePath := obj.Pkg().Path() == pk.Types.Path()
 
-		if packageIsSamePath || packageIsSame {
+		if packageIsSame || packageIsSamePath {
 			// Skip objects that belong to the initial package that was scanned.
 			continue
 		}
@@ -126,7 +126,7 @@ func autoDetect(startPkg string, dir string) (map[string][]string, map[string][]
 			continue
 		}
 
-		// Check whether obj.Pkg().Path() is not a subpath of pk.Types.Path(), i.e. they belong to the same root package.
+		// Check whether obj.Pkg().Path() is a subpath of pk.Types.Path(), i.e. they belong to the same root package.
 		// Skip objects belonging to packages that have the same root as the initial package.
 		if rootOfStart != nil {
 			// Check with root:
