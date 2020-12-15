@@ -101,10 +101,7 @@ func autoDetect(startPkg string, dir string) (map[string][]string, map[string][]
 		return nil, nil, fmt.Errorf("error while loading package: %s", err)
 	}
 
-	rootOfStart, err := vcs.RepoRootForImportPath(pk.Types.Path(), false)
-	if err != nil {
-		return nil, nil, err
-	}
+	rootOfStart, _ := vcs.RepoRootForImportPath(pk.Types.Path(), false)
 
 	pathToTypeNames := make(map[string][]string)
 	pathToFuncAndVarNames := make(map[string][]string)
@@ -136,14 +133,25 @@ func autoDetect(startPkg string, dir string) (map[string][]string, map[string][]
 			panic("This should not happen at this point.")
 			continue
 		}
-		{
+
+		// Check whether obj.Pkg().Path() is not a subpath of pk.Types.Path(), i.e. they belong to the same root package.
+		// Skip objects belonging to packages that have the same root as the initial package.
+		if rootOfStart != nil {
+			// Check with root:
 			rootOfThisObjPkg, err := vcs.RepoRootForImportPath(obj.Pkg().Path(), false)
-			if err != nil {
-				return nil, nil, err
+			if err == nil {
+				if rootOfStart.Root == rootOfThisObjPkg.Root {
+					continue
+				}
+			} else {
+				// Check with string prefix:
+				if strings.HasPrefix(obj.Pkg().Path(), pk.Types.Path()+"/") {
+					continue
+				}
 			}
-			// Check whether obj.Pkg().Path() is not a subpath of pk.Types.Path(), i.e. they belong to the same root package.
-			if rootOfStart == rootOfThisObjPkg {
-				// Skip objects belonging to packages that have the same root as the initial package.
+		} else {
+			// Check with string prefix:
+			if strings.HasPrefix(obj.Pkg().Path(), pk.Types.Path()+"/") {
 				continue
 			}
 		}
