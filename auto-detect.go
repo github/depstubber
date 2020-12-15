@@ -93,7 +93,7 @@ func autoDetect(startPkg string, dir string) (map[string][]string, map[string][]
 		return nil, nil, fmt.Errorf("error while loading package: %s", err)
 	}
 
-	rootOfStart, _ := vcs.RepoRootForImportPath(pk.Types.Path(), false)
+	rootOfStartPkg, _ := vcs.RepoRootForImportPath(pk.Types.Path(), false)
 
 	pathToTypeNames := make(map[string][]string)
 	pathToFuncAndVarNames := make(map[string][]string)
@@ -130,13 +130,11 @@ func autoDetect(startPkg string, dir string) (map[string][]string, map[string][]
 		// Skip objects belonging to packages that have the same root as the initial package.
 		pathsOverlap := strings.HasPrefix(obj.Pkg().Path(), pk.Types.Path()+"/")
 		// TODO: in pathsOverlap, also check (???): || strings.HasPrefix(pk.Types.Path(), obj.Pkg().Path()+"/")
-		if rootOfStart != nil {
+		if rootOfStartPkg != nil {
 			// Check with root:
 			rootOfThisObjPkg, err := vcs.RepoRootForImportPath(obj.Pkg().Path(), false)
-			if err == nil {
-				if rootOfStart.Root == rootOfThisObjPkg.Root {
-					continue
-				}
+			if err == nil && rootOfStartPkg.Root == rootOfThisObjPkg.Root {
+				continue
 			} else {
 				// Check with string prefix:
 				if pathsOverlap {
