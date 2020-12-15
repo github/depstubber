@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"golang.org/x/tools/go/packages"
+	"golang.org/x/tools/go/vcs"
 )
 
 type CombinedErrors struct {
@@ -100,6 +101,11 @@ func autoDetect(startPkg string, dir string) (map[string][]string, map[string][]
 		return nil, nil, fmt.Errorf("error while loading package: %s", err)
 	}
 
+	rootOfStart, err := vcs.RepoRootForImportPath(pk.Types.Path(), false)
+	if err != nil {
+		return nil, nil, err
+	}
+
 	pathToTypeNames := make(map[string][]string)
 	pathToFuncAndVarNames := make(map[string][]string)
 
@@ -129,6 +135,17 @@ func autoDetect(startPkg string, dir string) (map[string][]string, map[string][]
 			// that some objects might not be exported.
 			panic("This should not happen at this point.")
 			continue
+		}
+		{
+			rootOfThisObjPkg, err := vcs.RepoRootForImportPath(obj.Pkg().Path(), false)
+			if err != nil {
+				return nil, nil, err
+			}
+			// Check whether obj.Pkg().Path() is not a subpath of pk.Types.Path(), i.e. they belong to the same root package.
+			if rootOfStart == rootOfThisObjPkg {
+				// Skip objects belonging to packages that have the same root as the initial package.
+				continue
+			}
 		}
 
 		switch thing := obj.(type) {
