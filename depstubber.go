@@ -25,8 +25,8 @@ var (
 )
 var (
 	// NOTE: The detection is done IN THE CURRENT DIRECTORY.
-	autoDetectUsed  = flag.Bool("auto", false, "[experimental] Automatically detect imported objects in the current directory package.")
-	printGenComment = flag.Bool("print-gen", false, "[experimental] Automatically detect imported objects in the current dir pkg, and print go:generate comments for them, and then exit.")
+	modeAutoDetection      = flag.Bool("auto", false, "[experimental] Automatically detect imported objects in the current directory package.")
+	modePrintGoGenComments = flag.Bool("print", false, "[experimental] Automatically detect imported objects in the current dir pkg, and print go:generate comments for them, and then exit.")
 )
 
 func main() {
@@ -39,7 +39,7 @@ func main() {
 		return
 	}
 
-	if *printGenComment {
+	if *modePrintGoGenComments {
 		pathToTypeNames, pathToFuncAndVarNames, err := autoDetect(".", ".")
 		if err != nil {
 			log.Fatalf("Error while auto-detecting imported objects: %s", err)
@@ -48,7 +48,7 @@ func main() {
 		return
 	}
 
-	if *autoDetectUsed {
+	if *modeAutoDetection {
 		pathToTypeNames, pathToFuncAndVarNames, err := autoDetect(".", ".")
 		if err != nil {
 			log.Fatalf("Error while auto-detecting imported objects: %s", err)
