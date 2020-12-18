@@ -83,6 +83,10 @@ func NewPackage(pkgpath string, useExtTypes bool) *Package {
 		// if the name is a valid semver, use the parent's name
 		name = path.Base(path.Dir(pkgpath))
 	}
+	if token.IsKeyword(name) {
+		// Package name cannot be a keyword.
+		name = "go_pkg"
+	}
 
 	name = sanitize(name)
 	return &Package{
