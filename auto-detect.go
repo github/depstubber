@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"fmt"
+	"go/token"
 	"go/types"
 	"sort"
 	"strings"
@@ -87,6 +88,27 @@ func DeduplicateStrings(slice []string) []string {
 	return result
 }
 
+// removeBlankIdentifier returns a new slice with black identifier `_` removed.
+func removeBlankIdentifier(slice []string) []string {
+	result := []string{}
+	for _, val := range slice {
+		if val != "_" {
+			result = append(result, val)
+		}
+	}
+	return result
+}
+
+// removeUnexported returns a new slice with all unexported identifiers removed.
+func removeUnexported(slice []string) []string {
+	result := []string{}
+	for _, val := range slice {
+		if token.IsExported(val) {
+			result = append(result, val)
+		}
+	}
+	return result
+}
 func autoDetect(startPkg string, dir string) (map[string][]string, map[string][]string, error) {
 	pk, err := loadPackage(startPkg, dir)
 	if err != nil {
@@ -162,7 +184,8 @@ func autoDetect(startPkg string, dir string) (map[string][]string, map[string][]
 						pathToTypeNames[pkgPath] = append(pathToTypeNames[pkgPath], namedOrSignature.Obj().Name())
 					}
 				default:
-					panic(fmt.Sprintf("unknown type %T", obj.Type()))
+					fmt.Printf("ignoring type %T for object %s", obj.Type(), obj.String())
+					//panic(fmt.Sprintf("unknown type %T for object %s", obj.Type(), obj.String()))
 				}
 			}
 		case *types.Const:
@@ -172,21 +195,33 @@ func autoDetect(startPkg string, dir string) (map[string][]string, map[string][]
 			}
 		case *types.Var:
 			{
-				pkgPath := thing.Pkg().Path()
-				pathToFuncAndVarNames[pkgPath] = append(pathToFuncAndVarNames[pkgPath], thing.Name())
-			}
-		case *types.Func:
-			switch thing.Type().(type) {
-			case *types.Signature:
-				{
+				// Ignore fields
+				isNotAField := !thing.IsField()
+				if isNotAField {
 					pkgPath := thing.Pkg().Path()
 					pathToFuncAndVarNames[pkgPath] = append(pathToFuncAndVarNames[pkgPath], thing.Name())
 				}
+			}
+		case *types.Func:
+			switch sig := thing.Type().(type) {
+			case *types.Signature:
+				{
+					if sig.Recv() != nil {
+						// This is a method.
+						// Add receiver:
+						pkgPath := sig.Recv().Pkg().Path()
+						pathToFuncAndVarNames[pkgPath] = append(pathToFuncAndVarNames[pkgPath], sig.Recv().Name())
+					} else {
+						// This is a normal function.
+						pkgPath := thing.Pkg().Path()
+						pathToFuncAndVarNames[pkgPath] = append(pathToFuncAndVarNames[pkgPath], thing.Name())
+					}
+				}
 			default:
-				panic(fmt.Sprintf("unknown type %T", thing.Type()))
+				panic(fmt.Sprintf("unknown type %T for object %s", thing.Type(), obj.String()))
 			}
 		default:
-			panic(fmt.Sprintf("unknown type %T", obj))
+			panic(fmt.Sprintf("unknown type %T for object %s", obj, obj.String()))
 		}
 	}
 
@@ -194,11 +229,15 @@ func autoDetect(startPkg string, dir string) (map[string][]string, map[string][]
 		// Deduplicate and sort:
 		for pkgPath := range pathToTypeNames {
 			dedup := DeduplicateStrings(pathToTypeNames[pkgPath])
+			dedup = removeBlankIdentifier(dedup)
+			dedup = removeUnexported(dedup)
 			sort.Strings(dedup)
 			pathToTypeNames[pkgPath] = dedup
 		}
 		for pkgPath := range pathToFuncAndVarNames {
 			dedup := DeduplicateStrings(pathToFuncAndVarNames[pkgPath])
+			dedup = removeBlankIdentifier(dedup)
+			dedup = removeUnexported(dedup)
 			sort.Strings(dedup)
 			pathToFuncAndVarNames[pkgPath] = dedup
 		}
@@ -224,8 +263,6 @@ func FormatDepstubberComment(path string, typeNames []string, funcAndVarNames []
 		funcAndVarNames = DeduplicateStrings(funcAndVarNames)
 		sort.Strings(funcAndVarNames)
 		second = strings.Join(funcAndVarNames, ",")
-	} else {
-		second = `""`
 	}
 
 	return fmt.Sprintf(
