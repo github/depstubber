@@ -11,6 +11,7 @@ import (
 	"os"
 	"os/exec"
 	"path"
+	"path/filepath"
 	"reflect"
 	"sort"
 	"strconv"
@@ -930,7 +931,8 @@ func zeroOf(t Type, pm map[string]string, pkgOverride string) string {
 			if pkgOverride == t.Package || t.Package == "" {
 				return t.Name + "{}"
 			} else {
-				return t.Package + "." + t.Name + "{}"
+				// TODO: need the package name, not the package path.
+				return filepath.Base(t.Package) + "." + t.Name + "{}"
 			}
 		}
 		return zeroOf(t.Underlying, pm, pkgOverride)
