@@ -265,12 +265,12 @@ func FormatDepstubberComment(path string, typeNames []string, funcAndVarNames []
 		second = strings.Join(funcAndVarNames, ",")
 	}
 
-	return fmt.Sprintf(
+	return strings.TrimSpace(fmt.Sprintf(
 		"//go:generate depstubber -vendor %s %s %s",
 		path,
 		first,
 		second,
-	)
+	))
 }
 
 // printGoGenerateComments prints the `go:generate` depstubber comments.
