@@ -80,6 +80,9 @@ func main() {
 		packageName := flag.Arg(0)
 		createStubs(packageName, split(flag.Arg(1)), split(flag.Arg(2)))
 	}
+	if *vendor {
+		stubModulesTxt()
+	}
 }
 
 func createStubs(packageName string, typeNames []string, funcAndVarNames []string) {

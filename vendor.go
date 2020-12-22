@@ -81,6 +81,7 @@ func stubModulesTxt() {
 
 	if modRoot == "" {
 		// no go.mod was found, so we don't need to stub modules.txt
+		return
 	}
 
 	modFile := loadModFile(filepath.Join(modRoot, "go.mod"))
