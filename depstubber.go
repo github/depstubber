@@ -25,8 +25,8 @@ var (
 )
 var (
 	// NOTE: The detection is done IN THE CURRENT DIRECTORY.
-	modeAutoDetection      = flag.Bool("auto", false, "[experimental] Automatically detect imported objects in the current directory package.")
-	modePrintGoGenComments = flag.Bool("print", false, "[experimental] Automatically detect imported objects in the current dir pkg, and print go:generate comments for them, and then exit.")
+	modeAutoDetection      = flag.Bool("auto", false, "[experimental] Automatically detect imported objects in the current directory package, and stub them.")
+	modePrintGoGenComments = flag.Bool("print", false, "[experimental] Automatically detect imported objects in the current dir pkg, and print go:generate comments for them; then exit.")
 )
 
 func main() {
