@@ -148,10 +148,9 @@ func autoDetect(startPkg string, dir string) (map[string][]string, map[string][]
 			continue
 		}
 
-		// Check whether obj.Pkg().Path() is a subpath of pk.Types.Path(), i.e. they belong to the same root package.
+		// Check whether obj.Pkg().Path() is a subpath of pk.Types.Path() (or the other way round), i.e. they belong to the same root package.
 		// Skip objects belonging to packages that have the same root as the initial package.
-		pathsOverlap := strings.HasPrefix(obj.Pkg().Path(), pk.Types.Path()+"/")
-		// TODO: in pathsOverlap, also check (???): || strings.HasPrefix(pk.Types.Path(), obj.Pkg().Path()+"/")
+		pathsOverlap := strings.HasPrefix(obj.Pkg().Path(), pk.Types.Path()+"/") || strings.HasPrefix(pk.Types.Path(), obj.Pkg().Path()+"/")
 		if rootOfStartPkg != nil {
 			// Check with root:
 			rootOfThisObjPkg, err := vcs.RepoRootForImportPath(obj.Pkg().Path(), false)
