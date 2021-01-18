@@ -165,31 +165,20 @@ func autoDetect(startPkg string, dir string) (map[string][]string, map[string][]
 			}
 		}
 
+		pkgPath := obj.Pkg().Path()
 		switch thing := obj.(type) {
 		case *types.TypeName:
 			{
-				switch namedOrSignature := obj.Type().(type) {
-				case *types.Named:
-					{
-						pkgPath := namedOrSignature.Obj().Pkg().Path()
-						pathToTypeNames[pkgPath] = append(pathToTypeNames[pkgPath], namedOrSignature.Obj().Name())
-					}
-				default:
-					fmt.Printf("ignoring type %T for object %s", obj.Type(), obj.String())
-					//panic(fmt.Sprintf("unknown type %T for object %s", obj.Type(), obj.String()))
-				}
+				pathToTypeNames[pkgPath] = append(pathToTypeNames[pkgPath], obj.Name())
 			}
 		case *types.Const:
 			{
-				pkgPath := thing.Pkg().Path()
 				pathToFuncAndVarNames[pkgPath] = append(pathToFuncAndVarNames[pkgPath], thing.Name())
 			}
 		case *types.Var:
 			{
 				// Ignore fields
-				isNotAField := !thing.IsField()
-				if isNotAField {
-					pkgPath := thing.Pkg().Path()
+				if isNotAField := !thing.IsField(); isNotAField {
 					pathToFuncAndVarNames[pkgPath] = append(pathToFuncAndVarNames[pkgPath], thing.Name())
 				}
 			}
@@ -200,11 +189,9 @@ func autoDetect(startPkg string, dir string) (map[string][]string, map[string][]
 					if sig.Recv() != nil {
 						// This is a method.
 						// Add receiver:
-						pkgPath := sig.Recv().Pkg().Path()
 						pathToFuncAndVarNames[pkgPath] = append(pathToFuncAndVarNames[pkgPath], sig.Recv().Name())
 					} else {
 						// This is a normal function.
-						pkgPath := thing.Pkg().Path()
 						pathToFuncAndVarNames[pkgPath] = append(pathToFuncAndVarNames[pkgPath], thing.Name())
 					}
 				}
