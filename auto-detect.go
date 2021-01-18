@@ -140,7 +140,7 @@ func autoDetect(startPkg string, dir string) (map[string][]string, map[string][]
 		}
 
 		if notExported := !obj.Exported(); notExported {
-			panic(fmt.Sprintf("Encountered unexpected unexported type %v, which should not be accessible by this package (%s).", obj, pk.Pkg().Path()))
+			panic(fmt.Sprintf("Encountered unexpected unexported type %v, which should not be accessible by this package (%s).", obj, obj.Pkg().Path()))
 		}
 
 		// Check whether obj.Pkg().Path() is a subpath of pk.Types.Path() (or the other way round), i.e. they belong to the same root package.
