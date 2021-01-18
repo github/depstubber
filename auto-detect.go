@@ -22,7 +22,7 @@ func (ce *CombinedErrors) Error() string {
 	buf.WriteString("The following errors occurred:")
 	for _, err := range ce.errs {
 		if err != nil {
-			buf.WriteString("\n -  " + err.Error())
+			buf.WriteString("\n - " + err.Error())
 		}
 	}
 	return buf.String()
@@ -55,7 +55,7 @@ func loadPackage(startPkg string, dir string) (*packages.Package, error) {
 
 	pkgs, err := packages.Load(config, startPkg)
 	if err != nil {
-		return nil, fmt.Errorf("error while packages.Load: %s", err)
+		return nil, fmt.Errorf("error while running packages.Load: %s", err)
 	}
 
 	var errs []error
@@ -88,7 +88,7 @@ func DeduplicateStrings(slice []string) []string {
 	return result
 }
 
-// removeBlankIdentifier returns a new slice with black identifier `_` removed.
+// removeBlankIdentifier returns a new slice with blank identifier `_` removed.
 func removeBlankIdentifier(slice []string) []string {
 	result := []string{}
 	for _, val := range slice {
@@ -140,12 +140,7 @@ func autoDetect(startPkg string, dir string) (map[string][]string, map[string][]
 		}
 
 		if notExported := !obj.Exported(); notExported {
-			// Skip unexported objects.
-			// p.Package.TypesInfo.Uses also contains used objects that
-			// are declared inside the same package, and this means
-			// that some objects might not be exported.
-			panic("This should not happen at this point.")
-			continue
+			panic(fmt.Sprintf("Encountered unexpected unexported type %v, which should not be accessible by this package (%s).", obj, pk.Pkg().Path()))
 		}
 
 		// Check whether obj.Pkg().Path() is a subpath of pk.Types.Path() (or the other way round), i.e. they belong to the same root package.
@@ -217,7 +212,7 @@ func autoDetect(startPkg string, dir string) (map[string][]string, map[string][]
 					}
 				}
 			default:
-				panic(fmt.Sprintf("unknown type %T for object %s", thing.Type(), obj.String()))
+				panic(fmt.Sprintf("non-signature type %T for function %s", thing.Type(), obj.String()))
 			}
 		default:
 			panic(fmt.Sprintf("unknown type %T for object %s", obj, obj.String()))
