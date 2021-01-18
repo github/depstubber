@@ -168,10 +168,6 @@ func autoDetect(startPkg string, dir string) (map[string][]string, map[string][]
 		switch thing := obj.(type) {
 		case *types.TypeName:
 			{
-				if thing.IsAlias() {
-					// TODO: does this change something?
-				}
-
 				switch namedOrSignature := obj.Type().(type) {
 				case *types.Named:
 					{
