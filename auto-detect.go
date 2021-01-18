@@ -27,6 +27,7 @@ func (ce *CombinedErrors) Error() string {
 	}
 	return buf.String()
 }
+
 func allNil(errs ...error) bool {
 	for _, err := range errs {
 		if err != nil {
@@ -35,6 +36,7 @@ func allNil(errs ...error) bool {
 	}
 	return true
 }
+
 func CombineErrors(errs ...error) error {
 	if len(errs) == 0 || allNil(errs...) {
 		return nil
@@ -43,6 +45,7 @@ func CombineErrors(errs ...error) error {
 		errs: errs,
 	}
 }
+
 func loadPackage(startPkg string, dir string) (*packages.Package, error) {
 	config := &packages.Config{
 		Mode: packages.LoadSyntax | packages.NeedModule,
@@ -109,6 +112,7 @@ func removeUnexported(slice []string) []string {
 	}
 	return result
 }
+
 func autoDetect(startPkg string, dir string) (map[string][]string, map[string][]string, error) {
 	pk, err := loadPackage(startPkg, dir)
 	if err != nil {
