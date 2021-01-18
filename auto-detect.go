@@ -135,10 +135,7 @@ func autoDetect(startPkg string, dir string) (map[string][]string, map[string][]
 			continue
 		}
 
-		packageIsSame := obj.Pkg() == pk.Types
-		packageIsSamePath := obj.Pkg().Path() == pk.Types.Path()
-
-		if packageIsSame || packageIsSamePath {
+		if packageIsSamePath := obj.Pkg().Path() == pk.Types.Path(); packageIsSamePath {
 			// Skip objects that belong to the initial package that was scanned.
 			continue
 		}
