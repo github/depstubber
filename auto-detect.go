@@ -186,11 +186,7 @@ func autoDetect(startPkg string, dir string) (map[string][]string, map[string][]
 			switch sig := thing.Type().(type) {
 			case *types.Signature:
 				{
-					if sig.Recv() != nil {
-						// This is a method.
-						// Add receiver:
-						pathToFuncAndVarNames[pkgPath] = append(pathToFuncAndVarNames[pkgPath], sig.Recv().Name())
-					} else {
+					if notAMethod := sig.Recv() == nil; notAMethod {
 						// This is a normal function.
 						pathToFuncAndVarNames[pkgPath] = append(pathToFuncAndVarNames[pkgPath], thing.Name())
 					}
