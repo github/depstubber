@@ -168,28 +168,20 @@ func autoDetect(startPkg string, dir string) (map[string][]string, map[string][]
 		pkgPath := obj.Pkg().Path()
 		switch thing := obj.(type) {
 		case *types.TypeName:
-			{
-				pathToTypeNames[pkgPath] = append(pathToTypeNames[pkgPath], obj.Name())
-			}
+			pathToTypeNames[pkgPath] = append(pathToTypeNames[pkgPath], obj.Name())
 		case *types.Const:
-			{
-				pathToFuncAndVarNames[pkgPath] = append(pathToFuncAndVarNames[pkgPath], thing.Name())
-			}
+			pathToFuncAndVarNames[pkgPath] = append(pathToFuncAndVarNames[pkgPath], thing.Name())
 		case *types.Var:
-			{
-				// Ignore fields
-				if isNotAField := !thing.IsField(); isNotAField {
-					pathToFuncAndVarNames[pkgPath] = append(pathToFuncAndVarNames[pkgPath], thing.Name())
-				}
+			// Ignore fields
+			if isNotAField := !thing.IsField(); isNotAField {
+				pathToFuncAndVarNames[pkgPath] = append(pathToFuncAndVarNames[pkgPath], thing.Name())
 			}
 		case *types.Func:
 			switch sig := thing.Type().(type) {
 			case *types.Signature:
-				{
-					if notAMethod := sig.Recv() == nil; notAMethod {
-						// This is a normal function.
-						pathToFuncAndVarNames[pkgPath] = append(pathToFuncAndVarNames[pkgPath], thing.Name())
-					}
+				if notAMethod := sig.Recv() == nil; notAMethod {
+					// This is a normal function.
+					pathToFuncAndVarNames[pkgPath] = append(pathToFuncAndVarNames[pkgPath], thing.Name())
 				}
 			default:
 				panic(fmt.Sprintf("non-signature type %T for function %s", thing.Type(), obj.String()))
