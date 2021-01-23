@@ -130,8 +130,8 @@ func createStubs(packageName string, typeNames []string, funcAndVarNames []strin
 
 	g := new(generator)
 	g.srcPackage = packageName
-	g.srcExports = flag.Arg(1)
-	g.srcFunctions = flag.Arg(2)
+	g.srcExports = strings.Join(typeNames, ",")
+	g.srcFunctions = strings.Join(funcAndVarNames, ",")
 
 	if *copyrightFile != "" {
 		header, err := ioutil.ReadFile(*copyrightFile)
