@@ -106,6 +106,20 @@ func runInDir(program []byte, dir string) (*model.PackedPkg, error) {
 		return nil, err
 	}
 
+	{
+		// Copy go.mod into the build directory:
+		wd, err := os.Getwd()
+		if err != nil {
+			log.Fatalf("Unable to load current directory: %v", err)
+		}
+
+		modRoot := findModuleRoot(wd)
+
+		if modRoot != "" {
+			MustCopyFile(filepath.Join(modRoot, "go.mod"), filepath.Join(tmpDir, "go.mod"))
+		}
+	}
+
 	cmdArgs := []string{"build", "-mod=mod"}
 	if *buildFlags != "" {
 		cmdArgs = append(cmdArgs, strings.Split(*buildFlags, " ")...)
@@ -119,20 +133,6 @@ func runInDir(program []byte, dir string) (*model.PackedPkg, error) {
 	cmd.Stderr = os.Stderr
 	if err := cmd.Run(); err != nil {
 		return nil, err
-	}
-
-	{
-		// Copy go.mod into the build directory:
-		wd, err := os.Getwd()
-		if err != nil {
-			log.Fatalf("Unable to load current directory: %v", err)
-		}
-
-		modRoot := findModuleRoot(wd)
-
-		if modRoot != "" {
-			MustCopyFile(filepath.Join(modRoot, "go.mod"), filepath.Join(tmpDir, "go.mod"))
-		}
 	}
 
 	return run(filepath.Join(tmpDir, progBinary))
