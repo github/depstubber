@@ -82,8 +82,6 @@ func NewPackage(pkgpath string, useExtTypes bool) *Package {
 	if semver.IsValid(name) {
 		// if the name is a valid semver, use the parent's name
 		name = path.Base(path.Dir(pkgpath))
-		// TODO: there are false positives, like k8s.io/apimachinery/pkg/apis/meta/v1,
-		// where the package name is v1.
 	}
 	if token.IsKeyword(name) {
 		// Package name cannot be a keyword.
@@ -932,7 +930,6 @@ func zeroOf(t Type, pm map[string]string, pkgOverride string) string {
 			if pkgOverride == t.Package || t.Package == "" {
 				return t.Name + "{}"
 			} else {
-				// TODO: need the package name, not the package path.
 				return pm[t.Package] + "." + t.Name + "{}"
 			}
 		}
