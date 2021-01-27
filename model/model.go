@@ -87,7 +87,7 @@ func NewPackage(pkgpath string, useExtTypes bool) *Package {
 	}
 	if token.IsKeyword(name) {
 		// Package name cannot be a keyword.
-		name = "go_pkg"
+		name = sanitizeKeywords(name)
 	}
 
 	name = sanitize(name)
@@ -973,5 +973,14 @@ func sanitize(s string) string {
 	if t == "_" {
 		t = "x"
 	}
-	return t
+	return sanitizeKeywords(t)
+}
+
+func sanitizeKeywords(name string) string {
+	if token.IsKeyword(name) {
+		// Package name cannot be a keyword.
+		// Add a suffix.
+		name += "_pkg"
+	}
+	return name
 }
