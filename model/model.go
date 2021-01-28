@@ -926,7 +926,7 @@ func zeroOf(t Type, pm map[string]string, pkgOverride string) string {
 			if pkgOverride == t.Package || t.Package == "" {
 				return t.Name + "{}"
 			} else {
-				return t.Package + "." + t.Name + "{}"
+				return pm[t.Package] + "." + t.Name + "{}"
 			}
 		}
 		return zeroOf(t.Underlying, pm, pkgOverride)
@@ -966,5 +966,14 @@ func sanitize(s string) string {
 	if t == "_" {
 		t = "x"
 	}
-	return t
+	return sanitizeKeywords(t)
+}
+
+func sanitizeKeywords(name string) string {
+	if token.IsKeyword(name) {
+		// Package name cannot be a keyword.
+		// Add a suffix.
+		name += "_pkg"
+	}
+	return name
 }
