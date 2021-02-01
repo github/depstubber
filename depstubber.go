@@ -183,15 +183,15 @@ func createStubs(packageName string, typeNames []string, funcAndVarNames []strin
 				panic(err)
 			}
 
-			for _, v := range gatherFilenames(licenses) {
+			for _, licenseRelativePath := range gatherFilenames(licenses) {
 				// Exclude licenses of vendored packages:
-				if strings.Contains(v, "/vendor/") {
+				if strings.Contains(licenseRelativePath, "/vendor/") {
 					continue
 				}
-				licenseFilepath := filepath.Join(licenseSearchDir, v)
+				licenseFilepath := filepath.Join(licenseSearchDir, licenseRelativePath)
 
 				dstFolder := filepath.Dir(*destination)
-				dstFilepath := filepath.Join(dstFolder, v)
+				dstFilepath := filepath.Join(dstFolder, licenseRelativePath)
 				if strings.HasSuffix(dstFilepath, ".go") {
 					// When saving, add .txt extension.
 					dstFilepath += ".txt"

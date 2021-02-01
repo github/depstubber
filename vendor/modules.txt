@@ -1,6 +1,3 @@
-# github.com/davecgh/go-spew v1.1.1
-## explicit
-github.com/davecgh/go-spew/spew
 # github.com/dgryski/go-minhash v0.0.0-20170608043002-7fe510aff544
 github.com/dgryski/go-minhash
 # github.com/ekzhu/minhash-lsh v0.0.0-20171225071031-5c06ee8586a1
