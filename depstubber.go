@@ -14,6 +14,9 @@ import (
 	"strings"
 
 	"github.com/github/depstubber/model"
+	"github.com/go-enry/go-license-detector/v4/licensedb"
+	"github.com/go-enry/go-license-detector/v4/licensedb/api"
+	"github.com/go-enry/go-license-detector/v4/licensedb/filer"
 	"golang.org/x/tools/imports"
 )
 
@@ -39,7 +42,7 @@ func main() {
 	}
 
 	if *modePrintGoGenComments {
-		pathToTypeNames, pathToFuncAndVarNames, err := autoDetect(".", ".")
+		pathToTypeNames, pathToFuncAndVarNames, _, err := autoDetect(".", ".")
 		if err != nil {
 			log.Fatalf("Error while auto-detecting imported objects: %s", err)
 		}
@@ -48,7 +51,24 @@ func main() {
 	}
 
 	if *modeAutoDetection {
-		pathToTypeNames, pathToFuncAndVarNames, err := autoDetect(".", ".")
+		{
+			wd, err := os.Getwd()
+			if err != nil {
+				log.Fatalf("Unable to load current director: %v", err)
+			}
+			{ // Remove current /vendor dir if exists:
+				vendorDir := filepath.Join(findModuleRoot(wd), "vendor")
+				exists, err := DirExists(vendorDir)
+				if err != nil {
+					panic(err)
+				}
+				if exists {
+					os.RemoveAll(vendorDir)
+				}
+			}
+		}
+
+		pathToTypeNames, pathToFuncAndVarNames, pathToDirs, err := autoDetect(".", ".")
 		if err != nil {
 			log.Fatalf("Error while auto-detecting imported objects: %s", err)
 		}
@@ -69,6 +89,7 @@ func main() {
 				pkgPath,
 				pathToTypeNames[pkgPath],
 				pathToFuncAndVarNames[pkgPath],
+				pathToDirs[pkgPath],
 			)
 		}
 	} else {
@@ -77,14 +98,14 @@ func main() {
 			log.Fatal("Expected exactly two or three arguments")
 		}
 		packageName := flag.Arg(0)
-		createStubs(packageName, split(flag.Arg(1)), split(flag.Arg(2)))
+		createStubs(packageName, split(flag.Arg(1)), split(flag.Arg(2)), nil)
 	}
 	if *vendor {
 		stubModulesTxt()
 	}
 }
 
-func createStubs(packageName string, typeNames []string, funcAndVarNames []string) {
+func createStubs(packageName string, typeNames []string, funcAndVarNames []string, licenseDirs []string) {
 
 	var pkg *model.PackedPkg
 	var err error
@@ -150,6 +171,55 @@ func createStubs(packageName string, typeNames []string, funcAndVarNames []strin
 	if _, err := dst.Write(g.Output()); err != nil {
 		log.Fatalf("Failed writing to destination: %v", err)
 	}
+
+	if licenseDirs != nil {
+		for _, licenseSearchDir := range licenseDirs {
+			fl, err := filer.FromDirectory(licenseSearchDir)
+			if err != nil {
+				panic(err)
+			}
+			licenses, err := licensedb.Detect(fl)
+			if err != nil {
+				panic(err)
+			}
+
+			for _, v := range gatherFilenames(licenses) {
+				// Exclude licenses of vendored packages:
+				if strings.Contains(v, "/vendor/") {
+					continue
+				}
+				licenseFilepath := filepath.Join(licenseSearchDir, v)
+
+				dstFolder := filepath.Dir(*destination)
+				dstFilepath := filepath.Join(dstFolder, v)
+				if strings.HasSuffix(dstFilepath, ".go") {
+					// When saving, add .txt extension.
+					dstFilepath += ".txt"
+				}
+				fmt.Println(fmt.Sprintf("Copying %s to %s", licenseFilepath, dstFilepath))
+
+				MustCreateFolderIfNotExists(filepath.Dir(dstFilepath), os.ModePerm)
+				MustCopyFile(licenseFilepath, dstFilepath)
+			}
+		}
+	}
+}
+func gatherFilenames(matches map[string]api.Match) []string {
+	res := make([]string, 0)
+	for _, v := range matches {
+		res = append(res, mapKeys(v.Files)...)
+	}
+
+	return DeduplicateStrings(res)
+}
+
+func mapKeys(mp map[string]float32) []string {
+	res := make([]string, 0)
+	for key := range mp {
+		res = append(res, key)
+	}
+
+	return res
 }
 
 func usage() {
