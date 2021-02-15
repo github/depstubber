@@ -204,6 +204,7 @@ func createStubs(packageName string, typeNames []string, funcAndVarNames []strin
 		}
 	}
 }
+
 func gatherFilenames(matches map[string]api.Match) []string {
 	res := make([]string, 0)
 	for _, v := range matches {

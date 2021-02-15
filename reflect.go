@@ -8,7 +8,6 @@ import (
 	"flag"
 	"fmt"
 	"go/build"
-	"io"
 	"io/ioutil"
 	"log"
 	"os"
@@ -136,69 +135,6 @@ func runInDir(program []byte, dir string) (*model.PackedPkg, error) {
 	}
 
 	return run(filepath.Join(tmpDir, progBinary))
-}
-
-func DirExists(path string) (bool, error) {
-	return FileExists(path)
-}
-
-func FileExists(filepath string) (bool, error) {
-	_, err := os.Stat(filepath)
-	if os.IsNotExist(err) {
-		return false, nil
-	}
-	if err == nil {
-		return true, nil
-	}
-	return false, err
-}
-
-// CreateFolderIfNotExists creates a folder if it does not exists.
-func CreateFolderIfNotExists(name string, perm os.FileMode) error {
-	_, err := os.Stat(name)
-	if os.IsNotExist(err) {
-		return os.MkdirAll(name, perm)
-	}
-	return err
-}
-
-func MustCreateFolderIfNotExists(path string, perm os.FileMode) {
-	err := CreateFolderIfNotExists(path, perm)
-	if err != nil {
-		panic(fmt.Sprintf("error creating dir %q: %s", path, err))
-	}
-}
-
-func MustCopyFile(src, dst string) {
-	_, err := copyFile(src, dst)
-	if err != nil {
-		log.Fatalf("error copying %q to %q: %s", src, dst, err)
-	}
-}
-
-func copyFile(src, dst string) (int64, error) {
-	sourceFileStat, err := os.Stat(src)
-	if err != nil {
-		return 0, err
-	}
-
-	if !sourceFileStat.Mode().IsRegular() {
-		return 0, fmt.Errorf("%s is not a regular file", src)
-	}
-
-	source, err := os.Open(src)
-	if err != nil {
-		return 0, err
-	}
-	defer source.Close()
-
-	destination, err := os.Create(dst)
-	if err != nil {
-		return 0, err
-	}
-	defer destination.Close()
-	nBytes, err := io.Copy(destination, source)
-	return nBytes, err
 }
 
 var exportedIdRegex = regexp.MustCompile(`(\p{Lu}(\pL|\pN)*)(\.\p{Lu}(\pL|\pN))*`)
