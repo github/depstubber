@@ -14,9 +14,6 @@ import (
 	"strings"
 
 	"github.com/github/depstubber/model"
-	"github.com/go-enry/go-license-detector/v4/licensedb"
-	"github.com/go-enry/go-license-detector/v4/licensedb/api"
-	"github.com/go-enry/go-license-detector/v4/licensedb/filer"
 	"golang.org/x/tools/imports"
 )
 
@@ -173,55 +170,9 @@ func createStubs(packageName string, typeNames []string, funcAndVarNames []strin
 		log.Fatalf("Failed writing to destination: %v", err)
 	}
 
-	if licenseDirs != nil {
-		for _, licenseSearchDir := range licenseDirs {
-			fl, err := filer.FromDirectory(licenseSearchDir)
-			if err != nil {
-				panic(err)
-			}
-			licenses, err := licensedb.Detect(fl)
-			if err != nil {
-				panic(err)
-			}
-
-			for _, licenseRelativePath := range gatherFilenames(licenses) {
-				// Exclude licenses of vendored packages:
-				if strings.Contains(licenseRelativePath, "/vendor/") {
-					continue
-				}
-				licenseFilepath := filepath.Join(licenseSearchDir, licenseRelativePath)
-
-				dstFolder := filepath.Dir(*destination)
-				dstFilepath := filepath.Join(dstFolder, licenseRelativePath)
-				if strings.HasSuffix(dstFilepath, ".go") {
-					// When saving, add .txt extension.
-					dstFilepath += ".txt"
-				}
-				fmt.Println(fmt.Sprintf("Copying %s to %s", licenseFilepath, dstFilepath))
-
-				MustCreateFolderIfNotExists(filepath.Dir(dstFilepath), os.ModePerm)
-				MustCopyFile(licenseFilepath, dstFilepath)
-			}
-		}
+	if err := copyLicenses(licenseDirs); err != nil {
+		log.Fatalf("Failed to find/copy licenses: %v", err)
 	}
-}
-
-func gatherFilenames(matches map[string]api.Match) []string {
-	res := make([]string, 0)
-	for _, v := range matches {
-		res = append(res, mapKeys(v.Files)...)
-	}
-
-	return DeduplicateStrings(res)
-}
-
-func mapKeys(mp map[string]float32) []string {
-	res := make([]string, 0)
-	for key := range mp {
-		res = append(res, key)
-	}
-
-	return res
 }
 
 func usage() {
