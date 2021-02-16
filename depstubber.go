@@ -22,6 +22,7 @@ var (
 	vendor         = flag.Bool("vendor", false, "Set the destination to vendor/<PKGPATH>/stub.go; overrides '-destination'")
 	copyrightFile  = flag.String("copyright_file", "", "Copyright file used to add copyright header")
 	writeModuleTxt = flag.Bool("write_module_txt", false, "Write a stub modules.txt to get around the go1.14 vendor check, if necessary.")
+	forceOverwrite = flag.Bool("force", false, "Delete the destination vendor directory if it already exists.")
 )
 var (
 	modeAutoDetection      = flag.Bool("auto", false, "Automatically detect and stub dependencies of the Go package in the current directory.")
@@ -39,7 +40,7 @@ func main() {
 	}
 
 	if *modePrintGoGenComments {
-		pathToTypeNames, pathToFuncAndVarNames, err := autoDetect(".", ".")
+		pathToTypeNames, pathToFuncAndVarNames, _, err := autoDetect(".", ".")
 		if err != nil {
 			log.Fatalf("Error while auto-detecting imported objects: %s", err)
 		}
@@ -47,8 +48,25 @@ func main() {
 		return
 	}
 
+	if *vendor && *forceOverwrite {
+		wd, err := os.Getwd()
+		if err != nil {
+			log.Fatalf("Unable to load current director: %v", err)
+		}
+		{ // Remove current ./vendor dir if exists:
+			vendorDir := filepath.Join(findModuleRoot(wd), "vendor")
+			exists, err := DirExists(vendorDir)
+			if err != nil {
+				panic(err)
+			}
+			if exists {
+				os.RemoveAll(vendorDir)
+			}
+		}
+	}
+
 	if *modeAutoDetection {
-		pathToTypeNames, pathToFuncAndVarNames, err := autoDetect(".", ".")
+		pathToTypeNames, pathToFuncAndVarNames, pathToDirs, err := autoDetect(".", ".")
 		if err != nil {
 			log.Fatalf("Error while auto-detecting imported objects: %s", err)
 		}
@@ -69,6 +87,7 @@ func main() {
 				pkgPath,
 				pathToTypeNames[pkgPath],
 				pathToFuncAndVarNames[pkgPath],
+				pathToDirs[pkgPath],
 			)
 		}
 	} else {
@@ -77,14 +96,14 @@ func main() {
 			log.Fatal("Expected exactly two or three arguments")
 		}
 		packageName := flag.Arg(0)
-		createStubs(packageName, split(flag.Arg(1)), split(flag.Arg(2)))
+		createStubs(packageName, split(flag.Arg(1)), split(flag.Arg(2)), nil)
 	}
 	if *vendor {
 		stubModulesTxt()
 	}
 }
 
-func createStubs(packageName string, typeNames []string, funcAndVarNames []string) {
+func createStubs(packageName string, typeNames []string, funcAndVarNames []string, licenseDirs []string) {
 
 	var pkg *model.PackedPkg
 	var err error
@@ -149,6 +168,10 @@ func createStubs(packageName string, typeNames []string, funcAndVarNames []strin
 	}
 	if _, err := dst.Write(g.Output()); err != nil {
 		log.Fatalf("Failed writing to destination: %v", err)
+	}
+
+	if err := copyLicenses(licenseDirs); err != nil {
+		log.Fatalf("Failed to find/copy licenses: %v", err)
 	}
 }
 

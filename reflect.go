@@ -8,7 +8,6 @@ import (
 	"flag"
 	"fmt"
 	"go/build"
-	"io"
 	"io/ioutil"
 	"log"
 	"os"
@@ -136,37 +135,6 @@ func runInDir(program []byte, dir string) (*model.PackedPkg, error) {
 	}
 
 	return run(filepath.Join(tmpDir, progBinary))
-}
-func MustCopyFile(src, dst string) {
-	_, err := copyFile(src, dst)
-	if err != nil {
-		log.Fatalf("error copying %q to %q: %s", src, dst, err)
-	}
-}
-
-func copyFile(src, dst string) (int64, error) {
-	sourceFileStat, err := os.Stat(src)
-	if err != nil {
-		return 0, err
-	}
-
-	if !sourceFileStat.Mode().IsRegular() {
-		return 0, fmt.Errorf("%s is not a regular file", src)
-	}
-
-	source, err := os.Open(src)
-	if err != nil {
-		return 0, err
-	}
-	defer source.Close()
-
-	destination, err := os.Create(dst)
-	if err != nil {
-		return 0, err
-	}
-	defer destination.Close()
-	nBytes, err := io.Copy(destination, source)
-	return nBytes, err
 }
 
 var exportedIdRegex = regexp.MustCompile(`(\p{Lu}(\pL|\pN)*)(\.\p{Lu}(\pL|\pN))*`)

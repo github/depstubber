@@ -113,16 +113,23 @@ func removeUnexported(slice []string) []string {
 	return result
 }
 
-func autoDetect(startPkg string, dir string) (map[string][]string, map[string][]string, error) {
+func autoDetect(startPkg string, dir string) (map[string][]string, map[string][]string, map[string][]string, error) {
 	pk, err := loadPackage(startPkg, dir)
 	if err != nil {
-		return nil, nil, fmt.Errorf("error while loading package: %s", err)
+		return nil, nil, nil, fmt.Errorf("error while loading package: %s", err)
 	}
 
 	rootOfStartPkg, _ := vcs.RepoRootForImportPath(pk.Types.Path(), false)
 
 	pathToTypeNames := make(map[string][]string)
 	pathToFuncAndVarNames := make(map[string][]string)
+	pathToDirTmp := make(map[string][]string)
+
+	for path, v := range pk.Imports {
+		if v.Module != nil && v.Module.Dir != "" {
+			pathToDirTmp[path] = append(pathToDirTmp[path], v.Module.Dir)
+		}
+	}
 
 	for _, obj := range pk.TypesInfo.Uses {
 		if obj.Pkg() == nil || obj.Pkg().Path() == "" {
@@ -209,7 +216,18 @@ func autoDetect(startPkg string, dir string) (map[string][]string, map[string][]
 		}
 	}
 
-	return pathToTypeNames, pathToFuncAndVarNames, nil
+	pathToDir := make(map[string][]string)
+	// Select only used paths:
+	{
+		for pkgPath := range pathToTypeNames {
+			pathToDir[pkgPath] = pathToDirTmp[pkgPath]
+		}
+		for pkgPath := range pathToFuncAndVarNames {
+			pathToDir[pkgPath] = pathToDirTmp[pkgPath]
+		}
+	}
+
+	return pathToTypeNames, pathToFuncAndVarNames, pathToDir, nil
 }
 
 // FormatDepstubberComment returns the `depstubber` comment that will be used to stub types.
