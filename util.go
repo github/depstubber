@@ -144,3 +144,19 @@ func copyFile(src, dst string) (int64, error) {
 	nBytes, err := io.Copy(destination, source)
 	return nBytes, err
 }
+
+func deduplicate(slice []string) []string {
+	if len(slice) <= 1 {
+		return slice
+	}
+
+	result := []string{}
+	seen := make(map[string]struct{})
+	for _, val := range slice {
+		if _, ok := seen[val]; !ok {
+			result = append(result, val)
+			seen[val] = struct{}{}
+		}
+	}
+	return result
+}

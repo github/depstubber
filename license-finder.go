@@ -33,6 +33,7 @@ func copyLicenses(licenseDirs []string) error {
 				}
 			}
 		}
+		filenames = deduplicate(filenames)
 
 		for _, licenseRelativePath := range filenames {
 			// Exclude licenses of vendored packages:
