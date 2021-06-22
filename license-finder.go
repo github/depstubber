@@ -25,16 +25,16 @@ func copyLicenses(licenseDirs []string) error {
 		if err != nil {
 			return err
 		}
-		filenames := make([]string, 0)
+		filenames := make(map[string]bool)
 		{
 			for _, match := range licenses {
 				for fName := range match.Files {
-					filenames = append(filenames, fName)
+					filenames[fName] = true
 				}
 			}
 		}
 
-		for _, licenseRelativePath := range filenames {
+		for licenseRelativePath := range filenames {
 			// Exclude licenses of vendored packages:
 			if strings.Contains(licenseRelativePath, "/vendor/") {
 				continue
