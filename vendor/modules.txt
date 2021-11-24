@@ -103,7 +103,7 @@ github.com/russross/blackfriday/v2
 github.com/sergi/go-diff/diffmatchpatch
 # github.com/shogo82148/go-shuffle v0.0.0-20170808115208-59829097ff3b
 github.com/shogo82148/go-shuffle
-# github.com/shurcooL/sanitized_anchor_name v0.0.0-20170918181015-86672fcb3f95
+# github.com/shurcooL/sanitized_anchor_name v1.0.0
 github.com/shurcooL/sanitized_anchor_name
 # github.com/xanzy/ssh-agent v0.2.1
 github.com/xanzy/ssh-agent
@@ -126,7 +126,7 @@ golang.org/x/crypto/ssh
 golang.org/x/crypto/ssh/agent
 golang.org/x/crypto/ssh/internal/bcrypt_pbkdf
 golang.org/x/crypto/ssh/knownhosts
-# golang.org/x/exp v0.0.0-20190125153040-c74c464bbbf2
+# golang.org/x/exp v0.0.0-20191030013958-a1ab85dbe136
 golang.org/x/exp/rand
 # golang.org/x/mod v0.3.0
 ## explicit
@@ -194,8 +194,9 @@ gonum.org/v1/gonum/mathext/internal/gonum
 gonum.org/v1/gonum/stat
 gonum.org/v1/gonum/stat/combin
 gonum.org/v1/gonum/stat/distuv
-# gopkg.in/neurosnap/sentences.v1 v1.0.6
+# gopkg.in/neurosnap/sentences.v1 v1.0.6 => github.com/neurosnap/sentences v1.0.9
 gopkg.in/neurosnap/sentences.v1
 gopkg.in/neurosnap/sentences.v1/data
 # gopkg.in/warnings.v0 v0.1.2
 gopkg.in/warnings.v0
+# gopkg.in/neurosnap/sentences.v1 => github.com/neurosnap/sentences v1.0.9
