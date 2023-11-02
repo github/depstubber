@@ -12,6 +12,7 @@ The general usage pattern if vendoring is desired will look something like:
 ```sh
 PATH="$PATH:$GOPATH/bin"
 GO111MODULES=off go get github.com/github/depstubber
+GO111MODULES=off go install github.com/github/depstubber # Only needed for Go 1.18 and above
 go mod tidy # required to generate go.sum
 # generate a vendor/module.txt for the go 1.24 vendor consistency check
 depstubber -write_module_txt
