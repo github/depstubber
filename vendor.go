@@ -6,7 +6,6 @@ import (
 	"bytes"
 	"go/parser"
 	"go/token"
-	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
@@ -41,7 +40,7 @@ func findModuleRoot(dir string) (root string) {
 }
 
 func loadModFile(filename string) *modfile.File {
-	data, err := ioutil.ReadFile(filename)
+	data, err := os.ReadFile(filename)
 	if err != nil {
 		panic(err)
 	}
@@ -137,7 +136,7 @@ func stubModulesTxt() {
 			log.Fatalf("go mod vendor: %v", err)
 		}
 
-		if err := ioutil.WriteFile(filepath.Join(vdir, "modules.txt"), buf.Bytes(), 0666); err != nil {
+		if err := os.WriteFile(filepath.Join(vdir, "modules.txt"), buf.Bytes(), 0666); err != nil {
 			log.Fatalf("go mod vendor: %v", err)
 		}
 	}

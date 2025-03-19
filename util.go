@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"os"
 	"runtime/debug"
@@ -23,7 +22,7 @@ func removeDot(s string) string {
 
 // packageNameOfDir get package import path via dir
 func packageNameOfDir(srcDir string) (string, error) {
-	files, err := ioutil.ReadDir(srcDir)
+	files, err := os.ReadDir(srcDir)
 	if err != nil {
 		log.Fatal(err)
 	}

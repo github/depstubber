@@ -6,7 +6,6 @@ import (
 	"flag"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
@@ -153,7 +152,7 @@ func createStubs(packageName string, typeNames []string, funcAndVarNames []strin
 	g.srcFunctions = strings.Join(funcAndVarNames, ",")
 
 	if *copyrightFile != "" {
-		header, err := ioutil.ReadFile(*copyrightFile)
+		header, err := os.ReadFile(*copyrightFile)
 		if err != nil {
 			log.Fatalf("Failed reading copyright file: %v", err)
 		}
