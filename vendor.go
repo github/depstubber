@@ -181,6 +181,9 @@ func findPackagesInSourceCode(root string) map[string]bool {
 	return packages
 }
 
+// Compile the regular expression once
+var majorVersionSuffixRegex = regexp.MustCompile(`^/v[1-9][0-9]*(/|$)`)
+
 // findPackagesForModule returns the submodules of a given module that are actually used in the source code
 func findPackagesForModule(modulePath string, usedPackages map[string]bool) []string {
 	var packages []string
@@ -190,9 +193,12 @@ func findPackagesForModule(modulePath string, usedPackages map[string]bool) []st
 		if strings.HasPrefix(pkg, modulePath) {
 			// Extract the part after modulePath
 			suffix := pkg[len(modulePath):]
-			matched, _ := regexp.MatchString(`^/v[1-9][0-9]*(/|$)`, suffix)
 
-			if !matched {
+			// If `suffix` begins with a major version suffix then we do not have the right module
+			// path. For example, if the module path is `example.com/mymodule` and the package path
+			// is `example.com/mymodule/v2/submodule` then we should not consider it a match - it
+			// is really a match for the module `example.com/mymodule/v2`.
+			if !majorVersionSuffixRegex.MatchString(suffix) {
 				packages = append(packages, pkg)
 			}
 		}
