@@ -598,12 +598,17 @@ func (pt PredeclaredType) String(map[string]string, string) string { return stri
 func (pt PredeclaredType) addImports(map[string]bool)              {}
 
 type Field struct {
-	Name string
-	Type Type
+	Name      string
+	Type      Type
+	Anonymous bool
 }
 
 func (f *Field) String(pm map[string]string, pkgOverride string) string {
-	return f.Name + " " + f.Type.String(pm, pkgOverride)
+	if f.Anonymous {
+		return f.Type.String(pm, pkgOverride)
+	} else {
+		return f.Name + " " + f.Type.String(pm, pkgOverride)
+	}
 }
 
 // StructType is a struct type.
@@ -885,8 +890,9 @@ func (pkg *Package) unnamedTypeFromType(t reflect.Type) (Type, error) {
 			}
 
 			m := &Field{
-				Name: ft.Name,
-				Type: typ,
+				Name:      ft.Name,
+				Type:      typ,
+				Anonymous: ft.Anonymous,
 			}
 
 			fields = append(fields, m)
