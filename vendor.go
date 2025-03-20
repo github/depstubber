@@ -10,6 +10,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"sort"
 	"strings"
 
 	"golang.org/x/mod/modfile"
@@ -203,5 +204,7 @@ func findPackagesForModule(modulePath string, usedPackages map[string]bool) []st
 		}
 	}
 
+	// Sort packages for consistent output
+	sort.Strings(packages)
 	return packages
 }
