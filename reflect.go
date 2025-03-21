@@ -116,6 +116,18 @@ func runInDir(program []byte, dir string) (*model.PackedPkg, error) {
 
 		if modRoot != "" {
 			MustCopyFile(filepath.Join(modRoot, "go.mod"), filepath.Join(tmpDir, "go.mod"))
+
+			// To enable local development of model/model.go, uncomment the following lines
+			// f, err := os.OpenFile(filepath.Join(tmpDir, "go.mod"), os.O_APPEND|os.O_WRONLY, 0600)
+			// if err != nil {
+			// 	return nil, fmt.Errorf("failed to open go.mod for appending: %v", err)
+			// }
+			// defer f.Close()
+
+			// replaceDirective := "\n\nreplace github.com/github/depstubber => /Users/owen-mc/workspace/depstubber\n"
+			// if _, err := f.WriteString(replaceDirective); err != nil {
+			// 	return nil, fmt.Errorf("failed to append replace directive to go.mod: %v", err)
+			// }
 		}
 	}
 
