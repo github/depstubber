@@ -34,14 +34,16 @@ command.
 
 Limitations:
 
- - It is limited to a single package at a time.
- - There is no way to automatically stub all exports.
- - It does not generate memory-compatible types, as unexported types are
-   skipped.
- - There is no way to automatically detect exports used in a program.
- - There is no way to specify specific methods on a type; all methods are
-   automatically stubbed.
- - It cannot currently distinguish between type aliases. This is a
+- It is limited to a single package at a time.
+- There is no way to automatically stub all exports.
+- It does not generate memory-compatible types, as unexported types are
+  skipped.
+- There is no way to automatically detect exports used in a program.
+- There is no way to specify specific methods on a type; all methods are
+  automatically stubbed.
+- It cannot currently distinguish between type aliases. This is a
+  limitation of the `reflect` package.
+- It makes new method declarations for promoted methods. This is a
    limitation of the `reflect` package.
 
 Please feel free to submit a [pull
