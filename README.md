@@ -43,6 +43,8 @@ Limitations:
   automatically stubbed.
 - It cannot currently distinguish between type aliases. This is a
   limitation of the `reflect` package.
+- It makes new method declarations for promoted methods. This is a
+   limitation of the `reflect` package.
 
 Please feel free to submit a [pull
 request](https://github.com/github/depstubber/pulls) for any of the above, or
