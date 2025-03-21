@@ -8,7 +8,6 @@ import (
 	"flag"
 	"fmt"
 	"go/build"
-	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
@@ -44,7 +43,7 @@ func writeProgram(importPath string, types []string, values []string) ([]byte, e
 
 // run the given program and parse the output as a model.Package.
 func run(program string) (*model.PackedPkg, error) {
-	f, err := ioutil.TempFile("", "")
+	f, err := os.CreateTemp("", "")
 	if err != nil {
 		return nil, err
 	}
@@ -85,7 +84,7 @@ func run(program string) (*model.PackedPkg, error) {
 // parses the output as a model.Package.
 func runInDir(program []byte, dir string) (*model.PackedPkg, error) {
 	// We use TempDir instead of TempFile so we can control the filename.
-	tmpDir, err := ioutil.TempDir(dir, "depstubber_reflect_")
+	tmpDir, err := os.MkdirTemp(dir, "depstubber_reflect_")
 	if err != nil {
 		return nil, err
 	}
@@ -101,7 +100,7 @@ func runInDir(program []byte, dir string) (*model.PackedPkg, error) {
 		progBinary += ".exe"
 	}
 
-	if err := ioutil.WriteFile(filepath.Join(tmpDir, progSource), program, 0600); err != nil {
+	if err := os.WriteFile(filepath.Join(tmpDir, progSource), program, 0600); err != nil {
 		return nil, err
 	}
 
